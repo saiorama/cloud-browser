@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css" integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style>
+      /* Add your custom styles here */
+    </style>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.941.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script data-goatcounter="https://pretzelbox.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <!-- HTML Meta Tags -->
+    <title>CloudBrowser: Read-only browser for AWS</title>
+    <meta name="description" content="Quickly and safely view your AWS resources without opening the console, then use AI to analyse Lambdas, query Athena, and more">
+
+
+
+    <!-- Google / Search Engine Tags -->
+    <meta itemprop="name" content="CloudBrowser: Read-only browser for AWS">
+    <meta itemprop="description"
+      content="Quickly and safely view your AWS resources without opening the console, then use AI to analyse Lambdas, query Athena, and more">
+    <meta itemprop="image"
+      content="http://framerusercontent.com/modules/XGlgWyQ08lVhjrk8BQH9/P5hOLpgz4NCwwNKx0qVE/assets/ljzCBknke3c9XWGhavwiN9LFs4.jpg">
+
+
+
+    <!-- Facebook Meta Tags -->
+    <meta property="og:url" content="https://www.framer.com">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Framer: Ship sites with style">
+    <meta property="og:description"
+      content="Quickly and safely view your AWS resources without opening the console, then use AI to analyse Lambdas, query Athena, and more">
+    <meta property="og:image"
+      content="http://framerusercontent.com/modules/XGlgWyQ08lVhjrk8BQH9/P5hOLpgz4NCwwNKx0qVE/assets/ljzCBknke3c9XWGhavwiN9LFs4.jpg">
+
+
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CloudBrowser: Read-only browser for AWS">
+    <meta name="twitter:description"
+      content="Quickly and safely view your AWS resources without opening the console, then use AI to analyse Lambdas, query Athena, and more.">
+    <meta name="twitter:image"
+      content="http://framerusercontent.com/modules/XGlgWyQ08lVhjrk8BQH9/P5hOLpgz4NCwwNKx0qVE/assets/ljzCBknke3c9XWGhavwiN9LFs4.jpg">
+
+
+
+    <!-- Meta Tags Generated via http://heymeta.com -->
+  </head>
+  <body>
+    <div id="app">
+      <nav class="navbar is-spaced has-background-dark" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <span class="subtitle has-text-white">Cloud Browser</span>
+          </a>
+      
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+      
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-start">
+          </div>
+      
+          <div class="navbar-end">
+            <div class="navbar-item">
+              <div class="buttons">
+                <a class="navbar-item has-text-white" @click="showAlert('Just checking!')" data-goatcounter-click="documentation-cloud-browser">
+                  Documentation
+                </a>
+                <a class="button is-link" @click="showAlert('Just checking!')" data-goatcounter-click="buy-license-cloud-browser">
+                  <strong>Buy a license</strong>
+                </a>
+                <a class="button is-light" @click="showAlert('Just checking!')" data-goatcounter-click="self-host-cloud-browser">
+                  Self-Host
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="columns">
+        <div class="column">
+          <!-- Add content for the first column here -->
+          <aside class="menu p-4 m-2 has-background-link-light">
+            <p class="menu-label">
+              Admin
+            </p>
+            <ul class="menu-list">
+              <li>
+                <a :class="{'is-active' : menu_selection === 'settings'}" @click="setMenuSelection('settings')">Settings</a></li>
+              </li>
+            </ul>
+            <p class="menu-label">
+              AWS Products
+            </p>
+            <ul class="menu-list">
+              <li v-for="item in menu_items">
+                <a :class="{'is-active' : menu_selection === item.menu_selection}" @click="setMenuSelection(item.menu_selection, 'list')">{{ item.menu_selection }}</a></li>
+              </li>
+            </ul>
+          </aside>
+        </div>
+        <div class="column is-three-quarters">
+          <div v-if="Object.keys(api_calls).includes(menu_selection)"class="has-text-centered is-size-1"> {{ section_header }} 
+            <div class="is-flex is-justify-content-center is-flex-wrap-wrap"> 
+              <p v-if="!list_data || list_data.length === 0" class="is-size-4">{{ list_message }} </p> 
+              <div v-else class="card m-2" :class="{'is-clickable': api_description.next}" @click="api_description.next ? setMenuSelection(menu_selection, api_description.next, {name: api_description.title.split('.').pop(), value: item.title}): undefined" v-for="item in list_data">
+                <div class="card-content">
+                  <p class="title is-size-4"> {{ item.title.trim() }} </p>
+                  <div class="subtitle is-size-6 p-4 has-text-left" v-html="item.subtitle"></div>
+                </div>
+                <footer v-if="api_description && api_description.action_hooks && Object.keys(api_description.action_hooks).includes('openai')"class="card-footer">
+                  <a href="#" class="card-footer-item">
+                    <div class="dropdown is-right" :class="{'is-active': openai_is_open}">
+                      <div class="dropdown-trigger" @click="openai_is_open = !openai_is_open">
+                        <p class="subtitle is-italic is-6" v-if="api_description.action_hooks.openai.help_text">{{ api_description.action_hooks.openai.help_text }}</p>
+                        <button class="button is-link is-light" aria-haspopup="true" aria-controls="dropdown-menu7">
+                          <span>AI Assistance</span>
+                          <span class="icon is-small">
+                            <i class="fas fa-robot" aria-hidden="true"></i>
+                          </span>
+                        </button>
+                      </div>
+                      <div class="dropdown-menu" id="dropdown-menu7" role="menu">
+                        <div class="dropdown-content">
+                          <div class="dropdown-item">
+                            <div class="m-10"> 
+                              <textarea v-model="openai_textarea" class="textarea mb-2" rows="7"></textarea>
+                              <button class="button is-link" @click="getOpenAIResponse" :disabled="!openai_textarea">{{ api_description.action_hooks.openai.button_label || 'Get AI Assistance' }}</button>
+                            </div>
+                            <div class="m-10" :class="{'is-italic': !openai_response, 'notification is-link is-light': openai_response}">
+                              {{ openai_response || 'AI response will appear here' }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </footer>
+              </div>
+            </div>
+          </div>
+          <div v-else class="columns">
+            <div class="column is-half">
+              <div class="container p-4">
+                <!-- Add your form element with two input fields and a submit button here -->
+                <!--<form class="m-4 p-4">-->
+                  <p class="tag">
+                    AWS Key and Secret <span class="is-italic has-text-danger">(required)</span>
+                  </p>
+                  <div class="field is-horizontal">
+                    <div class="field-body">
+                      <div class="field">
+                        <p class="control is-expanded has-icons-left">
+                          <input class="input" type="text" placeholder="aws key" v-model="aws_key">
+                          <span class="icon is-small is-left">
+                            <i class="fas fa-key"></i>
+                          </span>
+                        </p>
+                      </div>
+                      <div class="field">
+                        <p class="control is-expanded has-icons-left">
+                          <input class="input" type="password" placeholder="aws secret" v-model="aws_secret">
+                          <span class="icon is-small is-left">
+                            <i class="fas fa-lock"></i>
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="tag">
+                      OpenAI Key <span class="is-italic has-text-link">(optional)</span>
+                    </p>
+                    <div class="field is-horizontal">
+                      <div class="field-body">
+                        <div class="field">
+                          <p class="control is-expanded has-icons-left">
+                            <input class="input" type="password" placeholder="OpenAI key" v-model="openai_key">
+                            <span class="icon is-small is-left">
+                              <i class="fas fa-lock"></i>
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field mt-4 pt-4">
+                    <div class="control">
+                      <button class="button is-link" :class="{'is-loading': saving_to_local_store}" @click="saveToLocalStorage">Save and Use </button>
+                      <div class="notification is-link is-light mt-4">
+                        Keys and secret are saved locally in your browser's local storage. Saved keys and secret will <strong>disappear</strong> if you clear your local storage OR are in a private browser session.
+                      </div>
+                    </div>
+                  </div>
+                <!--</form>-->
+              </div>
+            </div>
+            <div class="column">
+              <!-- Add content for the first column here -->
+            </div>
+          </div>
+        </div>
+        <div class="column">
+        </div>
+      </div>
+      <div id="modal-js-example" class="modal" :class="{'is-active': modal_is_open}">
+        <div class="modal-background" @click="toggleModal"></div>
+        <div class="modal-card" @click="toggleModal">
+          <header class="modal-card-head has-background-grey-light">
+            <p class="modal-card-title">{{ modal_data ? menu_selection + ':' + modal_data[0].title : '' }}</p>
+          </header>
+          <div class="modal-content">
+            <div class="box">
+              <iframe style="width: 100%;height: 100%;border:3px solid black;" :src="htmlAsBlob(modal_data ? modal_data[0].subtitle: '')"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    let stringAsDate = function(str) {
+     const options = { year: 'numeric', month: 'long', day: 'numeric' };
+     return (new Date(str)).toLocaleDateString(undefined, options);
+    };
+    let stringAsLink = function(str) {
+      return `<a href=${str} target="_blank">Link</a>`;
+    };
+    let jsonAsString = function(str) {
+      return JSON.stringify(str);
+    };
+    let htmlAsBlob2 = function(html_str){
+      var blob = new Blob([html_str], {type : 'text/html'});
+      return  window.URL.createObjectURL(blob);
+    };
+    let jsonArrayToCsv = function(arr, col='Name') {
+      if(Array.isArray(arr)){
+        return arr.reduce((acc, item) => {
+          acc.push(item[col]);
+          return acc;
+        }, []).join(',');
+      }
+      return arr;
+    };
+    var app = new Vue({
+      el: '#app',
+      data: function() {
+        return {
+          aws_key: '',
+          openai_key: '',
+          aws_secret: '',
+          aws_region: '',
+          enable_load_btn: false,
+          menu_selection: undefined,
+          menu_action: undefined,
+          repeat_menu_action: undefined,
+          api_description: undefined,
+          api_breadcrumbs: undefined,
+          api_result: undefined,
+          list_data: undefined,
+          list_message: undefined,
+          section_header: undefined,
+          clientFunctionMustBeExecuted: undefined,
+          modal_is_open: undefined,
+          modal_data: undefined,
+          saving_to_local_store: undefined,
+          openai_is_open: false,
+          openai_textarea: undefined,
+          openai_response: undefined,
+          api_calls: {
+            'Athena': {list: {func: 'listDataCatalogs', key: 'DataCatalogsSummary', section_header: 'Your Athena Catalogs', title: 'CatalogName', subtitle: 'Type', loading_message: 'Downloading catalogs...', empty_message: 'No catalogs found', formats: {subtitle: {withLabels: true}}, next: 'drill'}, drill: {func: 'listDatabases', params: 'CatalogName=$CatalogName', key: 'DatabaseList', section_header: 'Your databases', title: 'Name', subtitle: '', loading_message: 'Getting databases...', empty_message: 'No databases found', next: 'show'}, 'show':{func: 'listTableMetadata', params: 'CatalogName=$CatalogName, DatabaseName=$Name', key: 'TableMetadataList', section_header: 'Your table\'s metadata', title: 'Name', subtitle: 'Columns', loading_message: 'Getting tables metadata...', empty_message: 'No table metadata found', action_hooks: {openai: {prompt: '# MySQL table with properties\n#\n# $title($subtitle)\n#\n### ', prompt_suffix: '\n', help_text: 'Use AI to create complex SQL queries to query this Athena table'}}, formats: {subtitle: {Columns: jsonArrayToCsv, withLabels: true}}}, apiVersion: '2017-05-18'},
+            'SES': {list: {func: 'listTemplates', key: 'TemplatesMetadata', section_header: 'Your Email Templates', title: 'Name', subtitle: 'CreatedTimestamp', loading_message: 'Downloading templates...', empty_message: 'No templates found', formats: {subtitle: {CreatedTimestamp: stringAsDate, withLabels: true}}, next: 'drill'}, drill: {func: 'getTemplate', params: 'TemplateName=$Name', key: 'Template', section_header: 'Your Email Template', title: 'TemplateName', subtitle: 'SubjectPart', loading_message: 'Getting template...', empty_message: 'No Template found', next: 'show'}, show: {func: 'modal', key: 'Template', title: 'TemplateName', subtitle: 'SubjectPart, HtmlPart', next: 'show'}, apiVersion: '2010-12-01'},
+            'Lambda': {list: {func: 'listFunctions', key: 'Functions', section_header: 'Your Lambda Functions', title: 'FunctionName', subtitle: 'Version, Description, Runtime', next: 'drill', loading_message: 'Downloading Lambdas...'}, drill: {func: 'getFunction', params: 'FunctionName=$FunctionName', section_header: 'Your Function', title: 'Configuration.FunctionName', subtitle: 'Configuration.Runtime, Configuration.CodeSize, Configuration.LastModified, Code.Location', loading_message: 'Getting Lambda details...', empty_message: 'No function found', formats: {subtitle: { 'Configuration.LastModified': stringAsDate, 'Code.Location': stringAsLink, withLabels: true}}, next: 'show', action_hooks: {openai: {prompt: 'explain this code in plain english to a senior software engineer:\n ', parameter: 'Code.Location', injection_method: 'download', 'button_label': 'Explain Function', 'textarea_default_value': `\nPaste this Lambda function's code here then have OpenAI explain what it does...`}}}, show: {func: 'modal', title: 'Configuration.FunctionName', section_header: 'Your function details', subtitle: '*',  empty_message: 'No details found', formats: {subtitle: {'Configuration.Layers': jsonAsString, withLabels: true}}, next: 'show', action_hooks: {openai: {prompt: 'explain this code in plain english to a senior software engineer:\n ', parameter: 'Code.Location', injection_method: 'download', 'button_label': 'Explain Function'}}}, apiVersion: '2015-03-31'},
+            'DynamoDB': {list: {func: 'listTables', key: 'TableNames', section_header: 'Your DynamoDB Tables', title: '', subtitle: '', loading_message: 'Getting tables...', empty_message: 'No tables found', next: 'drill'}, drill: {func: 'describeTable', params: 'TableName', key: 'Table', section_header: 'Your Table', title: 'TableName', subtitle: 'CreationDateTime, ItemCount, KeySchema, AttributeDefinitions, GlobalSecondaryIndexes', loading_message: 'Getting table details...', empty_message: 'No table found', next: 'drill', formats: {subtitle: {'CreationDateTime': stringAsDate, 'KeySchema': jsonAsString,'AttributeDefinitions': jsonAsString,'GlobalSecondaryIndexes': jsonAsString, withLabels: true}}}, apiVersion: '2012-08-10'},
+          },
+        }
+      },
+      watch: {
+        aws_config: function(newVal, oldVal){
+          AWS.config.update({'region': newVal.region, 'credentials': new AWS.Credentials({accessKeyId: newVal.accessKeyId, secretAccessKey: newVal.secretAccessKey})});
+          if(newVal && newVal.accessKeyId && newVal.secretAccessKey && newVal.region) this.enable_load_btn = true; 
+        },
+        clientFunctionMustBeExecuted: function(n, o) {
+          if(this.clientFunctionMustBeExecuted){
+            if(Object.keys(this.api_calls).includes(this.menu_selection) && this.menu_action){
+              this.executeAPIClientFunction(this.menu_selection, this.menu_action);
+            }
+          }
+        },
+        api_result: async function(n, o) {
+          if(n) this.display(n);
+          this.openai_textarea = await this.get_openai_textarea();
+        },
+      },
+      computed: {
+        aws_config: function(){
+          return {
+            accessKeyId: this.aws_key,
+            secretAccessKey: this.aws_secret,
+            region: this.aws_region
+          };
+        },
+        menu_items: function(){
+          return Object.keys(this.api_calls).map(key => {
+            let call = this.api_calls[key];
+            call.menu_selection = key;
+            return call;
+          });
+        },
+      },
+      mounted: function() {
+        this.menu_selection = Object.keys(this.api_calls).shift();
+        this.loadKeysAndSecret();
+        if(!this.aws_key || !this.aws_secret) {
+          this.menu_selection = 'settings';
+        }
+        this.setMenuSelection(this.menu_selection, 'list');
+      },
+      methods: {
+        loadKeysAndSecret: function(){
+          this.aws_key = localStorage.getItem('aws_key') || undefined;
+          this.openai_key = localStorage.getItem('openai_key') || undefined;
+          this.aws_secret = localStorage.getItem('aws_secret') || undefined;
+          this.aws_region = localStorage.getItem('aws_region') || 'us-east-1';
+        },
+        get_openai_textarea_default: function() {
+          return (this.api_description.action_hooks.openai.textarea_default_value || '')
+                 .replace(/\$title/g, this.title || '')
+                 .replace(/\$subtitle/, this.subtitle || '');
+          
+        },
+        get_openai_textarea: async function(){
+          if(this.api_description && 
+             this.api_result &&
+             this.api_description.action_hooks && 
+             this.api_description.action_hooks.openai) {
+             return this.openai_textarea || this.get_openai_textarea_default() || undefined;
+          }
+        },
+        get_openai_prompt: function(){
+          let list_data = JSON.parse(JSON.stringify(this.list_data)).shift()
+          return (this.api_description.action_hooks.openai.prompt || '')
+                 .replace(/\$title/g, list_data.title_as_text.trim())
+                 .replace(/\$subtitle/, list_data.subtitle_as_text.trim());
+        },
+        get_openai_prompt_suffix: function(){
+          let list_data = JSON.parse(JSON.stringify(this.list_data)).shift()
+          return (this.api_description.action_hooks.openai.prompt_suffix || '')
+                 .replace(/\$title/g, list_data.title_as_text.trim())
+                 .replace(/\$subtitle/, list_data.subtitle_as_text.trim());
+        },
+        getOpenAIResponse: function(){
+          if(this.openai_textarea){
+            let txt = this.get_openai_prompt() + this.openai_textarea + this.get_openai_prompt_suffix();
+            let openai_url = "https://api.openai.com/v1/completions";
+            const requestOptions = {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.openai_key}` },
+              body: JSON.stringify({ prompt: txt.trim(), "max_tokens": 300, "temperature": 0.5, "top_p": 0.9, "model": "text-davinci-003" })
+            };
+            this.openai_response = `Getting Open AI's response...`;
+            fetch(openai_url, requestOptions)
+            .then(response => response.json())
+            .then(data => this.openai_response = data.choices[0].text)
+            .catch(e => this.openai_response = e);
+          }
+        },
+        htmlAsBlob: function(html_str){
+          var blob = new Blob([html_str], {type : 'text/html'});
+          return  window.URL.createObjectURL(blob);
+        },
+        display: function(data, type) {
+          if(this.api_description.key) data = data[this.api_description.key];
+          if(!Array.isArray(data)) data = [data];
+          let x = data.map(v => {
+            let return_val = {};
+            return_val.title = this.extractAndFormat(v, this.api_description, 'title');
+            return_val.subtitle = this.extractAndFormat(v, this.api_description, 'subtitle');
+            let asHtml = true;
+            return_val.title_as_text= this.extractAndFormat(v, this.api_description, 'title', !asHtml);
+            return_val.subtitle_as_text= this.extractAndFormat(v, this.api_description, 'subtitle', !asHtml);
+            return return_val;
+          });
+          if(type === 'modal') this.modal_data = x;
+          else this.list_data = x;
+        },
+        toggleModal: function(){ this.modal_is_open = !this.modal_is_open; },
+        setMenuSelection: function(val, menu_action, api_param){ 
+          this.clientFunctionMustBeExecuted = false;
+          if(val !== this.menu_selection || // user has selected a new product to browse
+             menu_action !== this.menu_action || //user is browsing up and down the same product
+             (api_param && (!this.api_breadcrumbs[api_param.name] || this.api_breadcrumbs[api_param.name] !== api_param.value)) || //user is looking at different peer products (e.g., clicking around on different lambda function)
+             this.repeat_menu_action // forced repeat at a leaf node
+            ){
+            this.menu_selection = val; 
+            this.menu_action = menu_action; 
+            if(val !== this.menu_selection || !this.api_breadcrumbs) this.api_breadcrumbs  = {};
+            if(api_param) this.api_breadcrumbs[api_param.name] = api_param.value.trim();
+            this.loadKeysAndSecret();
+            var client = this.getAWSAPIClient(val);
+            if(client) this.clientFunctionMustBeExecuted = true;
+          }
+        },
+        getAWSAPIClient: function(val){ 
+          if(this.api_calls[val]){
+            return new AWS[val]({apiVersion: this.api_calls[val].apiVersion});
+          }
+        }, 
+        getParamsForAPICall: function(){
+          let params = {};
+          if(this.api_description.params){
+            params = this.api_description.params.split(',').reduce((acc, paramPart) => {
+              let parts = paramPart.trim().split('=');
+              let partA = parts[0]; // field name to be used in the API call
+              let partB = "";
+              if(parts.length === 2) partB = parts[1].split('$')[1];
+              acc[partA] = this.api_breadcrumbs[partB];
+              return acc;
+            }, {});
+          }
+          return params;
+        },
+        executeAPIClientFunction: function(clientName, fn){
+          fn = fn || 'list';
+          var client = this.getAWSAPIClient(clientName);
+          if(client) {
+            this.api_description = this.api_calls[clientName][fn];
+            if(this.api_description){
+              this.repeat_menu_action = false;
+              switch(this.api_description.func){
+                case 'modal':
+                  this.display(this.api_result, this.api_description.func);
+                  this.modal_is_open = !this.modal_is_open;
+                  if(this.menu_action === this.api_description.next) this.repeat_menu_action = true;
+                  break;
+                default:
+                  this.section_header = this.api_description.section_header || 'Your data';
+                  this.list_data = undefined;
+                  let params = this.getParamsForAPICall();
+                  var that = this;
+                  that.api_result = undefined;
+                  that.list_message = this.api_description.loading_message || 'Loading...';
+                  client[that.api_description.func](params).promise()
+                  .then(data => {
+                    that.api_result = data;
+                    that.list_message = this.api_description.empty_message || 'No data available';
+                  })
+                  .catch(err => {
+                    this.list_message = `Status: ${err.statusCode} | Message: ${err.message}`;
+                    console.log(err);
+                  });
+                  break;
+              }
+              this.clientFunctionMustBeExecuted = false;
+            }
+          }
+        },
+        extractAndFormat: function(v, api_description, line, asHtml=true) {
+          if(api_description[line] === '') return v;
+          let fields = api_description[line];
+          let formatter = undefined;
+          if(api_description[line] === '*') {
+            fields = Object.keys(v).reduce((acc, key) => key + ', ' + acc, '');
+            formatter = jsonAsString;
+          }
+          if(fields !== '') {
+            return fields.split(',').reduce((acc, part) => {
+              if(part.trim() === "") return acc;
+              let sub_label = part.trim();
+              let x = part.split('.').reduce((deepVal, subpart) => {
+                deepVal = deepVal[subpart.trim()];
+                sub_label = subpart.trim();
+                return deepVal;
+              }, v);
+              let withLabels = (api_description.formats && 
+                 api_description.formats[line]) ? api_description.formats[line].withLabels : false;
+              if(api_description.formats && 
+                 api_description.formats[line] && 
+                 (api_description.formats[line][part.trim()] || formatter)) {
+                x = (api_description.formats[line][part.trim()] || formatter)(x);
+              }
+              if(asHtml){
+                acc = `${acc === '' ? acc : acc + '<br>'} ${withLabels ? '<span class="tag has-background-dark has-text-white p-2 m-2">' + sub_label + '</span>': ''} ${x}`;
+              } else {
+                acc = `${acc} ${x}`;
+              }
+              return acc;
+            }, '');
+          }
+        },
+        saveToLocalStorage: function() {
+          this.saving_to_local_store = true;
+          let msg = [];
+          if (this.aws_secret) {
+            localStorage.setItem('aws_secret', this.aws_secret);
+            msg.push('AWS Key');
+          }
+          if (this.aws_key) {
+            localStorage.setItem('aws_key', this.aws_key);
+            msg.push('AWS Secret');
+          }
+          if (this.openai_key) {
+            localStorage.setItem('openai_key', this.openai_key);
+            msg.push('OpenAI Key');
+          }
+          this.saving_to_local_store = false;
+          if(msg.length > 0) alert(`Saved: ${msg.join(',')}`);
+          
+        },
+        showAlert: function(msg){
+          alert(msg);
+        }
+      }
+    });
+
+  </script>
+</html>
+
