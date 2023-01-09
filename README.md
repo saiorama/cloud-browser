@@ -59,8 +59,6 @@ Here is an example of this in action:
 			"action_hooks": {
 				"openai": {
 					"prompt": "explain this code in plain english to a senior software engineer:\n ",
-					"parameter": "Code.Location",
-					"injection_method": "download",
 					"button_label": "Explain Function",
 					"textarea_default_value": "\nPaste this Lambda function's code here then have OpenAI explain what it does..."
 				}
@@ -82,8 +80,6 @@ Here is an example of this in action:
 			"action_hooks": {
 				"openai": {
 					"prompt": "explain this code in plain english to a senior software engineer:\n ",
-					"parameter": "Code.Location",
-					"injection_method": "download",
 					"button_label": "Explain Function"
 				}
 			}
@@ -119,4 +115,6 @@ Here is an example of this in action:
 
 `withLabels`: specifies that the formatting should include the label from where the data is being read. E.g., if `withLabels` is set to true, subtitle will say `Version=$Latest, Runtime=nodejs14.x,...` and so on.
 
-`action_hooks`: this is a bit of a value added feature. You could ask the interface to display various bells and whistles at any level of the interface. E.g., you could ask the interface to display an OpenAI textbox and set up a prompt to tell OpenAI what to do. In this example, we have asked OpenAI to explain what a given Lambda function does.
+`action_hooks`: this is a bit of a value added feature. You could ask the interface to display various bells and whistles at any level of the interface. E.g., you could ask the interface to display an OpenAI textbox and set up a prompt to tell OpenAI what to do. In this example, we have asked OpenAI to explain what a given Lambda function does. 
+
+A special note about the `prompt` field inside `action_hooks`. Since the `prompt` might only make sense if some contextual information from the AWS resource is included, the `prompt` can include two special string `$title` and `$subtitle`. While create the Open AI request, `$title` and `$subtitle` will be replaced by the actual value of `title` and `subtitle`.
