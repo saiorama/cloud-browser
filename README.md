@@ -1,15 +1,32 @@
 # Getting Started
 
-0. Make sure you have a tool like `http-server` installed to serve static pages locally
-1. Clone this repo
-2. Run `http-server`
+1. Clone this repo then `cd` into the cloned directory
+2. Run `http-server` to serve the index file 
 3. Visit the Cloud Browser in your browser
 
-## What is Cloud Browser?
+At the point, you should see the `Settings` page where you can enter your `AWS Key` and `Secret`. Save those values locally to your browser's Local Storage.
+
+## Prerequisites
+1. Make sure you have a tool like `http-server` installed to serve static pages locally
+2. AWS account with Key and Secret. The default region is set to `us-east-1`. Feel free to edit the value in index.html if you want to use some other area.
+
+# What is Cloud Browser?
 
 It is a programmable, read-only browser based interface to your AWS resources. 
 
-## Why do we need Cloud Browser when the AWS console exists?
+# What technologies does it use?
+
+1. AWS SDK aws-sdk-2.941.0 served from https://sdk.amazonaws.com/js/aws-sdk-2.941.0.min.js. I used V2 of AWS CLI to keep the setup simple. You can reduce the amount of code being sent over the wire by switching to V3 and only include AWK SDK objects that you care about.
+2. Bulma CSS 0.9.3 served from https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css. it's the only CSS I know but I'm sure a half competent UI developer can make the interface look very nice
+3. VueJS 3 from https://cdn.jsdelivr.net/npm/vue/dist/vue.js. I use it in the browser mode to keep the setup simple.
+4. FontAwesome
+5. GoatCounter for metrics
+
+# How safe/secure is Cloud Browser?
+
+Cloud Browser runs purely inside your browser and makes no server/backend network calls to anything other than AWS and OpenAI. You can verify this by monitoring your network traffic in browser DevTools. So, the app is as secure as your browser.
+
+# Why do we need Cloud Browser when the AWS console exists?
 
 1. The AWS console is a general purpose tool. That being the case, it is very common to have to click through a myriad menu options to surface information relevant to your specific use case.
 
@@ -17,7 +34,7 @@ It is a programmable, read-only browser based interface to your AWS resources.
 
 3. Product and engineering leadership want access to AWS without the cruft and want an easy way to get things done in there without (a) having to learn the ins and outs of AWS (b) having to wait for days for a principal engineer to actually build what they want. An example of this could be a SVP of technology wanting to show some interesting access patterns to the SVP of marketing using CloudFront logs.
 
-## How does Cloud Browser work?
+# How does Cloud Browser work?
 
 To answer this, we need to define two roles: a Cloud Browser Guru and a User. 
 
@@ -31,7 +48,7 @@ The key insight behind the DSL is that a typical AWS case involves _listing_ res
 
 Luckily for us, AWS provides a Javascript SDK to be used in the browser to help us *list*, *drill*, and *show* specific resources.
 
-Here is an example of this in action:
+Here is an example of this in action. Read the Glossary further down in this document while referencing this example.
 
 ```
 {
@@ -125,3 +142,9 @@ Here is an example of this in action:
 `action_hooks`: this is a bit of a value added feature. You could ask the interface to display various bells and whistles at any level of the interface. E.g., you could ask the interface to display an OpenAI textbox and set up a prompt to tell OpenAI what to do. In this example, we have asked OpenAI to explain what a given Lambda function does. 
 
 A special note about the `prompt` field inside `action_hooks`. Since the `prompt` might only make sense if some contextual information from the AWS resource is included, the `prompt` can include two special string `$title` and `$subtitle`. While create the Open AI request, `$title` and `$subtitle` will be replaced by the actual value of `title` and `subtitle`.
+
+# Why did you build Cloud Browser?
+
+1. I liked the technical challenge. 
+2. I've always wanted a better interface to view my AWS resources.
+3. Maybe this will be *it* for some definition of _it_
