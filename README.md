@@ -1,4 +1,9 @@
-# Cloud Browser
+# Getting Started
+
+0. Make sure you have a tool like `http-server` installed to serve static pages locally
+1. Clone this repo
+2. Run `http-server`
+3. Visit the Cloud Browser in your browser
 
 ## What is Cloud Browser?
 
@@ -88,6 +93,8 @@ Here is an example of this in action:
 	},
 }
 ```
+
+# Glossary
 
 `Lambda` corresponds to the Lambda client object defined by the SDK.
 
