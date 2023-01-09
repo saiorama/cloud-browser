@@ -113,7 +113,8 @@
         <div class="column is-three-quarters">
           <div v-if="Object.keys(api_calls).includes(menu_selection)"class="has-text-centered is-size-1"> {{ section_header }} 
             <div class="is-flex is-justify-content-center is-flex-wrap-wrap"> 
-              <p v-if="!list_data || list_data.length === 0" class="is-size-4">{{ list_message }} </p> 
+              <p v-if="!aws_key || !aws_secret"> Please enter and save an AWS Key and Secret </p>
+              <p v-else-if="!list_data || list_data.length === 0" class="is-size-4">{{ list_message }} </p> 
               <div v-else class="card m-2" :class="{'is-clickable': api_description.next}" @click="api_description.next ? setMenuSelection(menu_selection, api_description.next, {name: api_description.title.split('.').pop(), value: item.title}): undefined" v-for="item in list_data">
                 <div class="card-content">
                   <p class="title is-size-4"> {{ item.title.trim() }} </p>
