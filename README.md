@@ -99,6 +99,8 @@ Here is an example of this in action:
 
 `func`: is the name of the function that the you would like to call on the SDK's Lambda object. E.g., `listFunctions` corresponds to [this](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#listFunctions-property) Lambda API. `func` has a special magic value of `modal` which displays data in a `modal`
 
+`params`: a comma separated `Name1=$Value1, Name2=$Value2` string. Here, `Name1 | Name2 | ...` correspond to theparam name expected by the AWS SDK which `$Value1 | $Value2 | ...` correspond to the value of the variable whose name is `Value1 | Value2 | ...`. E.g. if the params string is `foo=$bar`, then the API call would expect a variable called `foo` and the value of `foo` would be value of `bar`. 
+
 `section_header`: is the title of the page as shown in the browser to the user. 
 
 `key`: sometimes, the AWS CLI returns a list of data attached to a specific key. E.g., the response to `listFunctions` results in a dictionary with root `Functions`. Specifying the `key` as `Functions` makes it easier to identify the array whose elements we need to show as a list.
