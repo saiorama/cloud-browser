@@ -4,7 +4,7 @@
 2. Run `http-server` to serve the index file 
 3. Visit the Cloud Browser in your browser
 
-At the point, you should see the `Settings` page where you can enter your `AWS Key` and `Secret`. Save those values locally to your browser's Local Storage.
+At this point, you should see the `Settings` page where you can enter your `AWS Key` and `Secret`. Save those values locally to your browser's Local Storage.
 
 ## Prerequisites
 1. Make sure you have a tool like `http-server` installed to serve static pages locally
@@ -30,7 +30,7 @@ Cloud Browser runs purely inside your browser and makes no server/backend networ
 
 1. The AWS console is a general purpose tool. That being the case, it is very common to have to click through a myriad menu options to surface information relevant to your specific use case.
 
-2. There is a lot of (understandable) handwringing that happens around giving AWS access to contractors and consultants. Adding and updating IAM policies to make sure every consultant/contractor is only seeing what they are supposed to see is an exercise no one enjoys doing. Plus, this busywork takes time away from bctually uilding stuff.
+2. There is a lot of (understandable) handwringing that happens around giving AWS access to contractors and consultants. Adding and updating IAM policies to make sure every consultant/contractor is only seeing what they are supposed to see is an exercise no one enjoys doing. Plus, this busywork takes time away from actually building stuff.
 
 3. Product and engineering leadership want access to AWS without the cruft and want an easy way to get things done in there without (a) having to learn the ins and outs of AWS (b) having to wait for days for a principal engineer to actually build what they want. An example of this could be a SVP of technology wanting to show some interesting access patterns to the SVP of marketing using CloudFront logs.
 
