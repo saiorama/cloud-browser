@@ -372,8 +372,18 @@
             };
             this.openai_response = `Getting Open AI's response...`;
             fetch(openai_url, requestOptions)
-            .then(response => response.json())
-            .then(data => this.openai_response = data.choices[0].text)
+            .then(response => {
+              if(response.status > 199 && 
+                 response.status < 300 && 
+                 response.status === 'ok') return response.json()
+              return response;
+            })
+            .then(data => {
+              if(data && data.choices && data.choices[0] && data.choices[0].text) this.openai_response = data.choices[0].text
+              else if(data.status === 400) this.openai_response = '400 (client error): Is your request too big?"';
+              else if(data.status === 401) this.openai_response = 'Looks like your OpenAI Key is invalid';
+              else this.openai_response = `(Error) ${data.statusCode} ${data.statusText}`
+            })
             .catch(e => this.openai_response = e);
           }
         },
