@@ -115,17 +115,17 @@
             <div class="is-flex is-justify-content-center is-flex-wrap-wrap"> 
               <p v-if="!aws_key || !aws_secret"> Please enter and save an AWS Key and Secret </p>
               <p v-else-if="!list_data || list_data.length === 0" class="is-size-4">{{ list_message }} </p> 
-              <div v-else class="card m-2" :class="{'is-clickable': api_description.next}" @click="api_description.next ? setMenuSelection(menu_selection, api_description.next, {name: api_description.title.split('.').pop(), value: item.title}): undefined" v-for="item in list_data">
-                <div class="card-content">
+              <div v-else class="card m-2" :class="{'is-clickable': api_description.next}" v-for="item in list_data">
+                <div class="card-content" @click="api_description.next ? setMenuSelection(menu_selection, api_description.next, {name: api_description.title.split('.').pop(), value: item.title}): undefined" >
                   <p class="title is-size-4"> {{ item.title.trim() }} </p>
                   <div class="subtitle is-size-6 p-4 has-text-left" v-html="item.subtitle"></div>
                 </div>
                 <footer v-if="api_description && api_description.action_hooks && Object.keys(api_description.action_hooks).includes('openai')"class="card-footer">
                   <a href="#" class="card-footer-item">
                     <div class="dropdown is-right" :class="{'is-active': openai_is_open}">
-                      <div class="dropdown-trigger" @click="openai_is_open = !openai_is_open">
+                      <div class="dropdown-trigger" >
                         <p class="subtitle is-italic is-6" v-if="api_description.action_hooks.openai.help_text">{{ api_description.action_hooks.openai.help_text }}</p>
-                        <button class="button is-link is-light" aria-haspopup="true" aria-controls="dropdown-menu7">
+                        <button class="button is-link is-light" aria-haspopup="true" aria-controls="dropdown-menu7" @click="openai_is_open = !openai_is_open">
                           <span>AI Assistance</span>
                           <span class="icon is-small">
                             <i class="fas fa-robot" aria-hidden="true"></i>
