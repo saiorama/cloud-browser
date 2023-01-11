@@ -513,6 +513,9 @@
         saveToLocalStorage: function() {
           this.saving_to_local_store = true;
           let msg = [];
+          localStorage.removeItem('aws_key');
+          localStorage.removeItem('aws_secret');
+          localStorage.removeItem('openai_key');
           if (this.aws_secret) {
             localStorage.setItem('aws_secret', this.aws_secret);
             msg.push('AWS Key');
