@@ -115,29 +115,29 @@ Here is an example of this in action. Read the Glossary further down in this doc
 
 `Lambda` corresponds to the Lambda client object defined by the SDK.
 
-`list`, `drill`, and `show` are three keys inside Lambda.
+`list`, `drill`, and `show` are three keys inside Lambda. `list` is the only required key. Your next step could be called anything you want so long as you specify the correct `next` value defined below.
 
-`func`: is the name of the function that the you would like to call on the SDK's Lambda object. E.g., `listFunctions` corresponds to [this](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#listFunctions-property) Lambda API. `func` has a special magic value of `modal` which displays data in a `modal`
+`func`: is the name of the function that the you would like to call on the SDK's Lambda object. E.g., `listFunctions` corresponds to [this](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#listFunctions-property) Lambda API. `func` can have a special magic value of `modal` which displays data in a browser modal
 
-`params`: a comma separated `Name1=$Value1, Name2=$Value2` string. Here, `Name1 | Name2 | ...` correspond to theparam name expected by the AWS SDK which `$Value1 | $Value2 | ...` correspond to the value of the variable whose name is `Value1 | Value2 | ...`. E.g. if the params string is `foo=$bar`, then the API call would expect a variable called `foo` and the value of `foo` would be value of `bar`. 
+`params`: a comma separated `Name1=$Value1, Name2=$Value2` string. Here, `Name1 | Name2 | ...` correspond to the param name expected by the AWS SDK. `$Value1 | $Value2 | ...` correspond to the value of the variable whose name is `Value1 | Value2 | ...`. E.g. if the params string is `foo=$bar`, then the API call would expect a variable called `foo` and the value of `foo` would be value of `bar`. 
 
 `section_header`: is the title of the page as shown in the browser to the user. 
 
-`key`: sometimes, the AWS CLI returns a list of data attached to a specific key. E.g., the response to `listFunctions` results in a dictionary with root `Functions`. Specifying the `key` as `Functions` makes it easier to identify the array whose elements we need to show as a list.
+`key`: sometimes, AWS returns a list of data attached to a specific key. E.g., the response to `listFunctions` results in a dictionary with root `Functions`. Specifying the `key` as `Functions` makes it easy to identify the array whose elements we need to show as a list.
 
-`title`: the name of the resource. E.g., treating `FunctionName` as the title lets you show the name of the Lambda function
+`title`: the name of the resource. E.g., setting title to `FunctionName` lets you display the name of the Lambda function.
 
-`subtitle`: some extra information about the resource to help users correctly identify the resource as the title lets you show the name of the Lambda function. The `subtitle` can be one of three values: '\*', \'\', or a comma delimited string. In this case, `Version, Description, Runtime` are a comma delimited set of keys each of which include some valuable information about the Lambda.
+`subtitle`: some extra information about the resource to help users correctly identify the resource. The `subtitle` can be one of three values: '\*', \'\', or a comma delimited string. In this case, `Version, Description, Runtime` are a comma delimited set of keys. Their values, concatenated as a comma delimited string, form the displayed subtitle.
 
 `next`: is the name of the next function to call when the user clicks on a specific lambda. Since `list` is followed by `drill`-ing into a specific function, `next` is set to `drill`.
 
-`loading_message` is the message to be shown while the underlying data is being requested from AWS by SDK 
+`loading_message` is the message to be shown while the underlying data is being requested from AWS by SDK. 
 
 `empty_message`: is the message to be shown when there is no data available to be shown.
 
-`formats.title` | `formats.subtitle`: how specific fields within the title or subtitle should be formatted. E.g., if your subtitle includes a date, you could request it to be formatted into a human friendly form. Links can be formatted in anchor tags with the anchor text of *Link*.
+`formats.title` | `formats.subtitle`: how specific fields within the title or subtitle should be formatted. E.g., if your subtitle includes a date, you could request it to be formatted into a human friendly form. Links can be formatted as anchor tags with the anchor text of *Link*.
 
-`withLabels`: specifies that the formatting should include the label from where the data is being read. E.g., if `withLabels` is set to true, subtitle will say `Version=$Latest, Runtime=nodejs14.x,...` and so on.
+`withLabels`: specifies that the formatting should include the label from where the data is being read. E.g., if `withLabels` is set to true, subtitle will say `Version=$Latest, Runtime=nodejs14.x,...` and so on. If `withLabel` is not defined or is set to false, the subtitle will say `$Latest, nodejs14.x, ...` without the labels.
 
 `action_hooks`: this is a bit of a value added feature. You could ask the interface to display various bells and whistles at any level of the interface. E.g., you could ask the interface to display an OpenAI textbox and set up a prompt to tell OpenAI what to do. In this example, we have asked OpenAI to explain what a given Lambda function does. 
 
