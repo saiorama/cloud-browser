@@ -52,66 +52,70 @@ Here is an example of this in action. Read the Glossary further down in this doc
 
 ```
 {
-	"Lambda": {
-		"list": {
-			"func": "listFunctions",
-			"key": "Functions",
-			"section_header": "Your Lambda Functions",
-			"title": "FunctionName",
-			"subtitle": "Version, Description, Runtime",
-			"next": "drill",
-			"loading_message": "Downloading Lambdas..."
-		},
-		"drill": {
-			"func": "getFunction",
-			"params": "FunctionName=$FunctionName",
-			"section_header": "Your Function",
-			"title": "Configuration.FunctionName",
-			"subtitle": "Configuration.Runtime, Configuration.CodeSize, Configuration.LastModified, Code.Location",
-			"loading_message": "Getting Lambda details...",
-			"empty_message": "No function found",
-			"formats": {
-				"subtitle": {
-					"Configuration.LastModified": stringAsDate,
-					"Code.Location": stringAsLink,
-					"withLabels": true
-				}
-			},
-			"next": "show",
-			"action_hooks": {
-				"openai": {
-					"prompt": "explain this code in plain english to a senior software engineer:\n ",
-					"button_label": "Explain Function",
-					"textarea_default_value": "\nPaste this Lambda function's code here then have OpenAI explain what it does..."
-				}
-			}
-		},
-		"show": {
-			"func": "modal",
-			"title": "Configuration.FunctionName",
-			"section_header": "Your function details",
-			"subtitle": "*",
-			"empty_message": "No details found",
-			"formats": {
-				"subtitle": {
-					"Configuration.Layers": jsonAsString,
-					"withLabels": true
-				}
-			},
-			"next": "show",
-			"action_hooks": {
-				"openai": {
-					"prompt": "explain this code in plain english to a senior software engineer:\n ",
-					"button_label": "Explain Function"
-				}
-			}
-		},
-		"apiVersion": "2015 - 03 - 31"
-	},
+  "list": {
+    "func": "listFunctions",
+    "key": "Functions",
+    "section_header": "Your Lambda Functions",
+    "title": "FunctionName",
+    "subtitle": "Version, Description, Runtime",
+    "next": "drill",
+    "loading_message": "Downloading Lambdas..."
+  },
+  "drill": {
+    "func": "getFunction",
+    "params": "FunctionName=$FunctionName",
+    "section_header": "Your Function",
+    "title": "Configuration.FunctionName",
+    "subtitle": "Configuration.Runtime, Configuration.CodeSize, Configuration.LastModified, Code.Location",
+    "loading_message": "Getting Lambda details...",
+    "empty_message": "No function found",
+    "formats": {
+      "subtitle": {
+        "Configuration.LastModified": stringAsDate,
+        "Code.Location": stringAsLink,
+        "withLabels": true
+      }
+    },
+    "next": "show",
+    "action_hooks": {
+      "openai": {
+        "prompt": "explain this code in plain english to a senior software engineer:\n ",
+        "parameter": "Code.Location",
+        "injection_method": "download",
+        "button_label": "Explain Function",
+        "textarea_default_value": "\nPaste this Lambda function"s code here then have OpenAI explain what it does..."
+      }
+    }
+  },
+  "show": {
+    "func": "modal",
+    "title": "Configuration.FunctionName",
+    "section_header": "Your function details",
+    "subtitle": "*",
+    "empty_message": "No details found",
+    "formats": {
+      "subtitle": {
+        "Configuration."Layers"": jsonAsString,
+        "withLabels": true
+      }
+    },
+    "next": "show",
+    "action_hooks": {
+      "openai": {
+        "prompt": "explain this code in plain english to a senior software engineer:\n ",
+        "parameter": "Code.Location",
+        "injection_method": "download",
+        "button_label": "Explain Function"
+      }
+    }
+  },
+  "apiVersion": "2015-03-31"
 }
 ```
 
 # Glossary
+
+`breadcrumbs` are name/value pairs you want to carry forward into down the stack. E.g., you may want to pass the Athena CatalogName down the stack while reading Athena tables since CatalogName is a required parameter for `list-table-metadata`.
 
 `Lambda` corresponds to the Lambda client object defined by the SDK.
 
