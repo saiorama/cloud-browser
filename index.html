@@ -121,7 +121,7 @@
               <p v-if="!aws_key || !aws_secret"> Please enter and save an AWS Key and Secret </p>
               <p v-else-if="!list_data || list_data.length === 0" class="is-size-4">{{ list_message }} </p> 
               <div v-else class="card m-2" :class="{'is-clickable': api_description.next}" v-for="item in list_data">
-                <div class="card-content" @click="api_description.next ? setMenuSelection(menu_selection, api_description.next, {name: api_description.title.split('.').pop(), value: item.title}): undefined" >
+                <div class="card-content" @click="api_description.next ? setMenuSelection(menu_selection, api_description.next, api_description.breadcrumbs ? item.breadcrumbs : undefined) : undefined">
                   <p class="title is-size-4"> {{ item.title.trim() }} </p>
                   <div class="subtitle is-size-6 p-4 has-text-left" v-html="item.subtitle"></div>
                 </div>
@@ -290,7 +290,7 @@
             'Lambda': {list: {func: 'listFunctions', key: 'Functions', section_header: 'Your Lambda Functions', title: 'FunctionName', subtitle: 'Version, Description, Runtime', next: 'drill', loading_message: 'Downloading Lambdas...'}, drill: {func: 'getFunction', params: 'FunctionName=$FunctionName', section_header: 'Your Function', title: 'Configuration.FunctionName', subtitle: 'Configuration.Runtime, Configuration.CodeSize, Configuration.LastModified, Code.Location', loading_message: 'Getting Lambda details...', empty_message: 'No function found', formats: {subtitle: { 'Configuration.LastModified': stringAsDate, 'Code.Location': stringAsLink, withLabels: true}}, next: 'show', action_hooks: {openai: {prompt: 'explain this code in plain english to a senior software engineer:\n ', parameter: 'Code.Location', injection_method: 'download', 'button_label': 'Explain Function', 'textarea_default_value': `\nPaste this Lambda function's code here then have OpenAI explain what it does...`}}}, show: {func: 'modal', title: 'Configuration.FunctionName', section_header: 'Your function details', subtitle: '*',  empty_message: 'No details found', formats: {subtitle: {'Configuration.Layers': jsonAsString, withLabels: true}}, next: 'show', action_hooks: {openai: {prompt: 'explain this code in plain english to a senior software engineer:\n ', parameter: 'Code.Location', injection_method: 'download', 'button_label': 'Explain Function'}}}, apiVersion: '2015-03-31'},
             'DynamoDB': {list: {func: 'listTables', key: 'TableNames', section_header: 'Your DynamoDB Tables', title: '', subtitle: '', loading_message: 'Getting tables...', empty_message: 'No tables found', next: 'drill'}, drill: {func: 'describeTable', params: 'TableName', key: 'Table', section_header: 'Your Table', title: 'TableName', subtitle: 'CreationDateTime, ItemCount, KeySchema, AttributeDefinitions, GlobalSecondaryIndexes', loading_message: 'Getting table details...', empty_message: 'No table found', next: 'drill', formats: {subtitle: {'CreationDateTime': stringAsDate, 'KeySchema': jsonAsString,'AttributeDefinitions': jsonAsString,'GlobalSecondaryIndexes': jsonAsString, withLabels: true}}}, apiVersion: '2012-08-10'},
             'APIGateway': {list: {func: 'getDomainNames', key: 'items', section_header: 'Your API Gateway Domains', title: 'domainName', subtitle: 'domainName, endpointConfiguration.types', next: 'drill', loading_message: 'Downloading domains...'}, drill: {func: 'getBasePathMappings', params: 'domainName=$domainName', section_header: 'Your Domain Mapping', key: 'items', title: 'restApiId', subtitle: '*', loading_message: 'Getting mapping details...', empty_message: 'No mapping found',formats:{ subtitle: {withLabels: true}}, next: 'show'}, show: {func: 'getResources', params:"restApiId=$restApiId", key:'items', title: 'path', section_header: 'Your API details', subtitle: 'resourceMethods, id', empty_message: 'No details found', formats: {subtitle: {'resourceMethods': jsonAsString, withLabels: true}}, next: undefined}, apiVersion: '2015-07-09'},
-            'Route53': {list: {func: 'listHostedZones', key: 'HostedZones', section_header: 'Your Hosted Zones', title: 'Id', subtitle: 'Name', next: 'drill', loading_message: 'Getting hosted zones...'}, drill: {func: 'getHostedZone', params: 'Id=$Id', section_header: 'Your Hosted Zone', title: 'HostedZone.Name', subtitle: 'HostedZone.Id, DelegationSet.NameServers', loading_message: 'Getting hosted zone...', empty_message: 'No hosted zonefound',formats:{ subtitle: { 'DelegationSet.NameServers': jsonAsString, withLabels: true}}, next: undefined}, apiVersion: '2013-04-01'},
+            'Route53': {list: {func: 'listHostedZones', key: 'HostedZones', section_header: 'Your Hosted Zones', title: 'Name', subtitle: 'Id', next: 'drill', loading_message: 'Getting hosted zones...', breadcrumbs: 'Id=$Id'}, drill: {func: 'getHostedZone', params: 'Id=$Id', section_header: 'Your Hosted Zone', title: 'HostedZone.Name', subtitle: 'HostedZone.Id, DelegationSet.NameServers', loading_message: 'Getting hosted zone...', empty_message: 'No hosted zone found',formats:{ subtitle: { 'DelegationSet.NameServers': jsonAsString, withLabels: true}}, next: 'show', breadcrumbs: 'HostedZoneId=$HostedZone.Id'}, show: {func: 'listResourceRecordSets', params: 'HostedZoneId=$HostedZoneId', key: 'ResourceRecordSets', title: 'Name', subtitle: 'Type, AliasTarget, ResourceRecords', loading_message: 'Getting hosted zone...', empty_message: 'No hosted zone found',formats:{ subtitle: { 'AliasTarget': jsonAsString, 'ResourceRecords': jsonAsString, withLabels: true}}, next: undefined}, apiVersion: '2013-04-01'},
           },
         }
       },
@@ -408,6 +408,16 @@
             let asHtml = true;
             return_val.title_as_text= this.extractAndFormat(v, this.api_description, 'title', !asHtml);
             return_val.subtitle_as_text= this.extractAndFormat(v, this.api_description, 'subtitle', !asHtml);
+            if(this.api_description.breadcrumbs) {
+              return_val.breadcrumbs = this.api_description.breadcrumbs.split(',').reduce((acc, crumb) => {
+                let parts = crumb.trim().split('=');
+                acc[parts[0]] = parts[1].split('\.').reduce((deepVal, partsB) => {
+                  deepVal = deepVal[partsB.split('\$').pop()];
+                  return deepVal;
+                }, v);
+                return acc;
+              }, {});
+            }
             return return_val;
           });
           if(type === 'modal') this.modal_data = x;
@@ -423,10 +433,10 @@
             ){
             this.menu_selection = val; 
             this.menu_action = menu_action; 
-            if(val !== this.menu_selection || !this.api_breadcrumbs) this.api_breadcrumbs  = {};
-            if(api_param) this.api_breadcrumbs[api_param.name] = api_param.value.trim();
+            if(val !== this.menu_selection || !this.api_breadcrumbs) this.api_breadcrumbs = {};
             this.loadKeysAndSecret();
             var client = this.getAWSAPIClient(val);
+            this.api_breadcrumbs = api_param;
             if(client) this.clientFunctionMustBeExecuted = true;
           }
         },
@@ -437,7 +447,7 @@
         }, 
         getParamsForAPICall: function(){
           let params = {};
-          if(this.api_description.params){
+          if(this.api_description.params && this.api_breadcrumbs){
             params = this.api_description.params.split(',').reduce((acc, paramPart) => {
               let parts = paramPart.trim().split('=');
               let partA = parts[0]; // field name to be used in the API call
