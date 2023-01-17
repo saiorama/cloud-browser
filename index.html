@@ -511,6 +511,7 @@
                 sub_label = subpart.trim();
                 return deepVal;
               }, v);
+              if(!x || (Array.isArray(x) && x.length === 0)) return acc;
               let withLabels = (api_description.formats && 
                  api_description.formats[line]) ? api_description.formats[line].withLabels : false;
               if(api_description.formats && 
